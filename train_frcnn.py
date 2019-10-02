@@ -40,6 +40,8 @@ parser.add_option("-o", "--parser", dest="parser", help="Parser to use. One of s
 parser.add_option("-n", "--num_rois", dest="num_rois", help="Number of RoIs to process at once.", default=32)
 parser.add_option("--network", dest="network", help="Base network to use. Supports vgg or resnet50.", default='resnet50')
 parser.add_option("--hf", dest="horizontal_flips", help="Augment with horizontal flips in training. (Default=false).", action="store_true", default=False)
+parser.add_option("--fm", dest="freq_mask", help="Augment with frequency mask in training. (Default=false).", action="store_true", default=False)
+parser.add_option("--tm", dest="time_mask", help="Augment with time mask in training. (Default=false).", action="store_true", default=False)
 parser.add_option("--vf", dest="vertical_flips", help="Augment with vertical flips in training. (Default=false).", action="store_true", default=False)
 parser.add_option("--rot", "--rot_90", dest="rot_90", help="Augment with 90 degree rotations in training. (Default=false).",
                   action="store_true", default=False)
@@ -68,6 +70,8 @@ C = config.Config()
 C.use_horizontal_flips = bool(options.horizontal_flips)
 C.use_vertical_flips = bool(options.vertical_flips)
 C.rot_90 = bool(options.rot_90)
+C.use_freq_mask = bool(options.freq_mask)
+C.use_time_mask = bool(options.time_mask)
 
 C.model_path = options.output_weight_path
 C.num_rois = int(options.num_rois)
@@ -159,7 +163,7 @@ model_classifier = Model([img_input, roi_input], classifier)
 
 # this is a model that holds both the RPN and the classifier, used to load/save weights for the models
 model_all = Model([img_input, roi_input], rpn[:2] + classifier)
-
+print(model_all.summary())
 try:
     # load_weights by name
     # some keras application model does not containing name

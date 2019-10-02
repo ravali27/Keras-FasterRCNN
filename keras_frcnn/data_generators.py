@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import numpy as np
-import cv2
+#import cv2
 import random
 import copy
 from . import data_augment
@@ -271,6 +271,12 @@ def threadsafe_generator(f):
         return threadsafe_iter(f(*a, **kw))
     return g
 
+def resize_n(old, new_shape):
+    new_f, new_t = new_shape
+    old_f, old_t = old.shape
+    scale_f, scale_t = new_f/old_f, new_t/old_t
+    new = interpolation.zoom(old, (scale_f, scale_t))
+    return new 
 
 def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backend, mode='train'):
 
@@ -306,7 +312,7 @@ def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backen
                 (resized_width, resized_height) = get_new_img_size(width, height, C.im_size)
 
                 # resize the image so that smalles side is length = 600px
-                x_img = cv2.resize(x_img, (resized_width, resized_height), interpolation=cv2.INTER_CUBIC)
+                x_img = resize_n(x_img, (resized_width, resized_height))
 
                 try:
                     # rpn ground-truth cls, reg

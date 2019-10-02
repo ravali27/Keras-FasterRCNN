@@ -26,7 +26,8 @@ def get_data(input_path):
         for line in f:
             line_split = line.strip().split(',')
             (filename,x1,y1,x2,y2,class_name) = line_split
-            filename = '/home/LORIEN+ravali.nalla/Txt_Data/' + filename
+            filename = '/home/LORIEN+ravali.nalla/Txt_data/' + filename#.strip()
+            #filename = filename.strip()
             if class_name not in classes_count:
                 classes_count[class_name] = 1
             else:
@@ -44,22 +45,25 @@ def get_data(input_path):
                 img = np.loadtxt(filename)
                 sd = 2126.5
                 img = img/sd
-                img = resize_n(img)
+                img = resize_n(img, (224, 224))
                 img = np.stack((img, img, img), axis=2)
                 (rows,cols) = img.shape[:2]
                 all_imgs[filename]['filepath'] = filename
                 all_imgs[filename]['width'] = cols
                 all_imgs[filename]['height'] = rows
                 all_imgs[filename]['bboxes'] = []
-                set_n = filename.split('/')[4]
-                if set_n == "Train" or set_n == "Validate":
-                    all_imgs[filename]['imageset'] = 'trainval'
+                set_n = filename.split('/')[5]
+                #print(set_n)
+                if set_n == "Train":
+                    all_imgs[filename]['imageset'] = 'train'
+                elif set_n == "Validate":
+                    all_imgs[filename]['imageset'] = 'val'
                 else:
                     all_imgs[filename]['imageset'] = 'test'
 
             all_imgs[filename]['bboxes'].append({'class': class_name, 'x1': int(x1), 'x2': int(x2), 'y1': int(y1), 'y2': int(y2)})
-
-
+            
+        print('Done parsing.')
         all_data = []
         for key in all_imgs:
             all_data.append(all_imgs[key])

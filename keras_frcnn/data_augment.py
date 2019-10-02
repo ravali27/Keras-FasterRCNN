@@ -1,7 +1,7 @@
 #import cv2
 import numpy as np
 from scipy.ndimage import interpolation
-import random
+#import random
 import copy
 
 def resize_n(old, new_shape):
@@ -20,18 +20,21 @@ def augment(img_data, config, augment=True):
     img_data_aug = copy.deepcopy(img_data)
 
 #    img = cv2.imread(img_data_aug['filepath'])
+    #print(img_data_aug['filepath'])
     img = np.loadtxt(img_data_aug['filepath'])
     sd = 2126.5
     img = img/sd
-    img = resize_n(img)
+    img = resize_n(img, (224, 224))
     #img = np.stack((img, img, img), axis=2)
 
     if augment:
         rows, cols = img.shape[:2]
+        print(img.shape)
 
         if config.use_freq_mask and np.random.randint(0, 2) == 0:
-            mid = random.randrange(img.shape[0])
-            length = random.randrange(10)
+            print('freq_mask')
+            mid = np.random.randint(0, img.shape[0])
+            length = np.random.randint(0, 10)
             img_new = img
             start = mid -length
             stop = mid + length
@@ -40,11 +43,11 @@ def augment(img_data, config, augment=True):
             if stop >= img.shape[0]:
                 stop = img.shape[0]-1
             img_new[:, start:stop] = np.mean(img[:, start:stop])
-            img = np.stack((img_new, img_new, img_new), axis=2)
 
         if config.use_time_mask and np.random.randint(0, 2) == 0:
-            mid = random.randrange(img.shape[1])
-            length = random.randrange(10)
+            print('time_mask')
+            mid = np.random.randint(0, img.shape[1])
+            length = np.random.randint(0, 10)
             img_new = img
             start = mid -length
             stop = mid + length
@@ -53,8 +56,8 @@ def augment(img_data, config, augment=True):
             if stop >= img.shape[1]:
                 stop = img.shape[1]-1
             img_new[start:stop, :] = np.mean(img[start:stop, :])
-            img = np.stack((img_new, img_new, img_new), axis=2)
-
+            
+        img = np.stack((img_new, img_new, img_new), axis=2)
         if config.use_horizontal_flips and np.random.randint(0, 2) == 5:
             #img = cv2.flip(img, 1)
             for bbox in img_data_aug['bboxes']:
@@ -77,6 +80,7 @@ def augment(img_data, config, augment=True):
                 img = np.transpose(img, (1,0,2))
                 #img = cv2.flip(img, 0)
             elif angle == 180:
+                img = np.transpose(img, (1,0,2))
                 #img = cv2.flip(img, -1)
             elif angle == 90:
                 img = np.transpose(img, (1,0,2))

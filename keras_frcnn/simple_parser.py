@@ -1,12 +1,17 @@
-#import cv2
+from __future__ import division
 import numpy as np
 from scipy.ndimage import interpolation
+
 
 def resize_n(old, new_shape):
     new_f, new_t = new_shape
     old_f, old_t = old.shape
-    scale_f, scale_t = new_f/old_f, new_t/old_t
+    scale_f = new_f/old_f
+    scale_t = new_t/old_t
+    #print(scale_f, 'scale_f-------------------')
+    #print(scale_t, 'scale_t-------------------')
     new = interpolation.zoom(old, (scale_f, scale_t))
+    #print(new.shape)
     return new 
 
 def get_data(input_path):
@@ -41,13 +46,15 @@ def get_data(input_path):
 
             if filename not in all_imgs:
                 all_imgs[filename] = {}
-
-                img = np.loadtxt(filename)
+                #print(filename)
+                img_o = np.loadtxt(filename)
                 sd = 2126.5
-                img = img/sd
+                img = img_o/sd
+                #print(img.shape, 'old')
                 img = resize_n(img, (224, 224))
                 img = np.stack((img, img, img), axis=2)
                 (rows,cols) = img.shape[:2]
+                #print(img.shape)
                 all_imgs[filename]['filepath'] = filename
                 all_imgs[filename]['width'] = cols
                 all_imgs[filename]['height'] = rows

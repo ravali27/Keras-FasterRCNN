@@ -22,6 +22,8 @@ from keras.callbacks import TensorBoard
 
 
 
+
+
 def write_log(callback, names, logs, batch_no):
     for name, value in zip(names, logs):
         summary = tf.Summary()

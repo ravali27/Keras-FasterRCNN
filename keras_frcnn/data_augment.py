@@ -1,4 +1,4 @@
-#import cv2
+from __future__ import division
 import numpy as np
 from scipy.ndimage import interpolation
 #import random
@@ -20,10 +20,10 @@ def augment(img_data, config, augment=True):
     img_data_aug = copy.deepcopy(img_data)
 
 #    img = cv2.imread(img_data_aug['filepath'])
-    #print(img_data_aug['filepath'])
-    img = np.loadtxt(img_data_aug['filepath'])
+    print(img_data_aug['filepath'])
+    img_o = np.loadtxt(img_data_aug['filepath'])
     sd = 2126.5
-    img = img/sd
+    img = img_o/sd
     img = resize_n(img, (224, 224))
     #img = np.stack((img, img, img), axis=2)
 

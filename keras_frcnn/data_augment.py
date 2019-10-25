@@ -16,11 +16,11 @@ def augment(img_data, config, augment=True):
     assert 'bboxes' in img_data
     assert 'width' in img_data
     assert 'height' in img_data
-
+    #print(img_data, 'before aug')
     img_data_aug = copy.deepcopy(img_data)
 
 #    img = cv2.imread(img_data_aug['filepath'])
-    print(img_data_aug['filepath'])
+    #print(img_data_aug['filepath'])
     img_o = np.loadtxt(img_data_aug['filepath'])
     sd = 2126.5
     img = img_o/sd
@@ -29,10 +29,10 @@ def augment(img_data, config, augment=True):
 
     if augment:
         rows, cols = img.shape[:2]
-        print(img.shape)
+        #print(img.shape)
 
         if config.use_freq_mask and np.random.randint(0, 2) == 0:
-            print('freq_mask')
+            #print('freq_mask')
             mid = np.random.randint(0, img.shape[0])
             length = np.random.randint(0, 10)
             img_new = img
@@ -43,9 +43,10 @@ def augment(img_data, config, augment=True):
             if stop >= img.shape[0]:
                 stop = img.shape[0]-1
             img_new[:, start:stop] = np.mean(img[:, start:stop])
+            img = img_new
 
         if config.use_time_mask and np.random.randint(0, 2) == 0:
-            print('time_mask')
+            #print('time_mask')
             mid = np.random.randint(0, img.shape[1])
             length = np.random.randint(0, 10)
             img_new = img
@@ -56,61 +57,10 @@ def augment(img_data, config, augment=True):
             if stop >= img.shape[1]:
                 stop = img.shape[1]-1
             img_new[start:stop, :] = np.mean(img[start:stop, :])
-            
-        img = np.stack((img_new, img_new, img_new), axis=2)
-        if config.use_horizontal_flips and np.random.randint(0, 2) == 5:
-            #img = cv2.flip(img, 1)
-            for bbox in img_data_aug['bboxes']:
-                x1 = bbox['x1']
-                x2 = bbox['x2']
-                bbox['x2'] = cols - x1
-                bbox['x1'] = cols - x2
+            img = img_new
 
-        if config.use_vertical_flips and np.random.randint(0, 2) == 5:
-            #img = cv2.flip(img, 0)
-            for bbox in img_data_aug['bboxes']:
-                y1 = bbox['y1']
-                y2 = bbox['y2']
-                bbox['y2'] = rows - y1
-                bbox['y1'] = rows - y2
-
-        if config.rot_90:
-            angle = 0#np.random.choice([0,90,180,270],1)[0]
-            if angle == 270:
-                img = np.transpose(img, (1,0,2))
-                #img = cv2.flip(img, 0)
-            elif angle == 180:
-                img = np.transpose(img, (1,0,2))
-                #img = cv2.flip(img, -1)
-            elif angle == 90:
-                img = np.transpose(img, (1,0,2))
-                #img = cv2.flip(img, 1)
-            elif angle == 0:
-                pass
-
-            for bbox in img_data_aug['bboxes']:
-                x1 = bbox['x1']
-                x2 = bbox['x2']
-                y1 = bbox['y1']
-                y2 = bbox['y2']
-                if angle == 270:
-                    bbox['x1'] = y1
-                    bbox['x2'] = y2
-                    bbox['y1'] = cols - x2
-                    bbox['y2'] = cols - x1
-                elif angle == 180:
-                    bbox['x2'] = cols - x1
-                    bbox['x1'] = cols - x2
-                    bbox['y2'] = rows - y1
-                    bbox['y1'] = rows - y2
-                elif angle == 90:
-                    bbox['x1'] = rows - y2
-                    bbox['x2'] = rows - y1
-                    bbox['y1'] = x1
-                    bbox['y2'] = x2
-                elif angle == 0:
-                    pass
-
+    img = np.stack((img, img, img), axis=2)
     img_data_aug['width'] = img.shape[1]
     img_data_aug['height'] = img.shape[0]
+    #print(img_data_aug, 'after aug')
     return img_data_aug, img

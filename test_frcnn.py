@@ -47,6 +47,8 @@ elif C.network == 'vgg':
 C.use_horizontal_flips = False
 C.use_vertical_flips = False
 C.rot_90 = False
+C.use_freq_mask = False
+C.use_time_mask = False
 
 img_path = options.test_path
 

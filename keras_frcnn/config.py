@@ -27,7 +27,7 @@ class Config:
         self.im_size = 600
 
         # image channel-wise mean to subtract
-        self.img_channel_mean = [103.939, 116.779, 123.68]
+        self.img_channel_mean = [0, 0, 0]
         self.img_scaling_factor = 1.0
 
         # number of ROIs at once
@@ -39,7 +39,7 @@ class Config:
         self.balanced_classes = False
 
         # scaling the stdev
-        self.std_scaling = 4.0
+        self.std_scaling = 1.0
         self.classifier_regr_std = [8.0, 8.0, 4.0, 4.0]
 
         # overlaps for RPN

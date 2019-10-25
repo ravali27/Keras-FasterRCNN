@@ -1,9 +1,11 @@
 from __future__ import absolute_import
+from __future__ import division
 import numpy as np
 #import cv2
 import random
 import copy
 from . import data_augment
+from scipy.ndimage import interpolation
 import threading
 import itertools
 
@@ -48,7 +50,8 @@ def get_new_img_size(width, height, img_min_side=600):
         f = float(img_min_side) / height
         resized_width = int(f * width)
         resized_height = int(img_min_side)
-
+    #print(resized_width, 'rw')
+    #print(resized_height, 'rh')
     return resized_width, resized_height
 
 
@@ -273,9 +276,10 @@ def threadsafe_generator(f):
 
 def resize_n(old, new_shape):
     new_f, new_t = new_shape
-    old_f, old_t = old.shape
+    old_f, old_t = old.shape[0], old.shape[1]
     scale_f, scale_t = new_f/old_f, new_t/old_t
-    new = interpolation.zoom(old, (scale_f, scale_t))
+    new = interpolation.zoom(old, (scale_f, scale_t, 1))
+    #print(new.shape, 'new shape')
     return new 
 
 def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backend, mode='train'):
@@ -296,34 +300,35 @@ def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backen
                     continue
 
                 # read in image, and optionally add augmentation
-
+                #print('here1')
                 if mode == 'train':
                     img_data_aug, x_img = data_augment.augment(img_data, C, augment=True)
                 else:
                     img_data_aug, x_img = data_augment.augment(img_data, C, augment=False)
-
+                #print('here2')
                 (width, height) = (img_data_aug['width'], img_data_aug['height'])
+                #print('here3')
                 (rows, cols, _) = x_img.shape
-
+                #print('here4')
                 assert cols == width
                 assert rows == height
 
                 # get image dimensions for resizing
                 (resized_width, resized_height) = get_new_img_size(width, height, C.im_size)
-
+                #print('here5')
                 # resize the image so that smalles side is length = 600px
                 x_img = resize_n(x_img, (resized_width, resized_height))
-
+                #print('here6')
                 try:
                     # rpn ground-truth cls, reg
                     y_rpn_cls, y_rpn_regr = calc_rpn(C, img_data_aug, width, height, resized_width, resized_height, img_length_calc_function)
                 except:
                     continue
-
+                #print('here7')
                 # Zero-center by mean pixel, and preprocess image
 
                 x_img = x_img[:, :, (2, 1, 0)]  # BGR -> RGB
-                x_img = x_img.astype(np.float32)
+                #x_img = x_img.astype(np.float32)
                 x_img[:, :, 0] -= C.img_channel_mean[0]
                 x_img[:, :, 1] -= C.img_channel_mean[1]
                 x_img[:, :, 2] -= C.img_channel_mean[2]
@@ -340,7 +345,8 @@ def get_anchor_gt(all_img_data, class_count, C, img_length_calc_function, backen
                     y_rpn_regr = np.transpose(y_rpn_regr, (0, 2, 3, 1))
 
                 yield np.copy(x_img), [np.copy(y_rpn_cls), np.copy(y_rpn_regr)], img_data_aug
-
+                #print('here8')
             except Exception as e:
                 print(e)
                 continue
+                #print('here6')
